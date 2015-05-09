@@ -59,15 +59,18 @@ fn say_hello(context: Context, response: Response) {
     }
 }
 
-fn todo_all(context: Context, response: Response) {
-    //Get the value of the path variable `:person`, from below.
-    let person = match context.variables.get("person") {
-        Some(name) => &name[..],
-        None => "stranger"
-    };
+type TODO<'a> = HashMap<String,&'a Item>;
 
+fn todo_all(context: Context, response: Response) {
+
+    //let mut todo = TODO::new();
+    //let mut it = Item::new();
+
+    //todo.insert(it.id.to_owned(), &it);
+    //Get the value of the path variable `:person`, from below.
+    let json_string = "[1,2,3]"; //json::to_string(&todo).unwrap().to_owned();
     //Use the value of the path variable to say hello.
-    if let Err(e) = response.into_writer().send(format!("Hello, {}!", person))  {
+    if let Err(e) = response.into_writer().send(format!("{}!", json_string ))  {
         //There is not much we can do now
         context.log.note(&format!("could not send hello: {}", e.description()));
     }
