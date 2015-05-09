@@ -45,52 +45,40 @@ impl Item  {
 }
 
 
-fn say_hello(context: Context, response: Response) {
-    //Get the value of the path variable `:person`, from below.
-    let person = match context.variables.get("person") {
-        Some(name) => &name[..],
-        None => "stranger"
-    };
+struct TODO {
+       operation: String,
+       items: Vec<Item>
+}
 
-    //Use the value of the path variable to say hello.
-    if let Err(e) = response.into_writer().send(format!("Hello, {}!", person))  {
+
+impl Handler for TODO {
+    fn handle_request(&self, context: Context, mut response: Response) {
+        println!("{}", self.operation);
+        /*
+        let json = match self.operation {
+            "all" => "all",
+            "one" => "one",
+             _  => "unknown",
+        };
+        */
+        let json = "json_string";
+        if let Err(e) = response.into_writer().send(format!("Hello, {}!", json))  {
         //There is not much we can do now
         context.log.note(&format!("could not send hello: {}", e.description()));
+        }
+
     }
+
 }
-
-fn todo_all(context: Context, response: Response) {
-    //Get the value of the path variable `:person`, from below.
-    let person = match context.variables.get("person") {
-        Some(name) => &name[..],
-        None => "stranger"
-    };
-
-    //Use the value of the path variable to say hello.
-    if let Err(e) = response.into_writer().send(format!("Hello, {}!", person))  {
-        //There is not much we can do now
-        context.log.note(&format!("could not send hello: {}", e.description()));
-    }
-}
-
-
-//Dodge an ICE, related to functions as handlers.
-struct HandlerFn(fn(Context, Response));
-impl Handler for HandlerFn {
-    fn handle_request(&self, context: Context, response: Response) {
-        self.0(context, response);
-    }
-}
-
 
 
 fn main() {
+    let items : Vec<Item> = Vec::new();
+    let it = Item::new();
 
     let mut router = TreeRouter::new();
-    router.insert(Get, "/" , HandlerFn(say_hello));
-    router.insert(Get, "/:person",  HandlerFn(say_hello));
-    router.insert(Get, "/todos",HandlerFn(todo_all));
-
+    router.insert(Get, "/todos",TODO { operation: "all".to_string(), items: items }  );
+    //router.insert(Get, "/todos/:id",TODO { operation: "find".to_string(), items: items }  );
 
     // server
     let server_result = Server {
