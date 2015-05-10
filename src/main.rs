@@ -45,24 +45,18 @@ impl Item  {
 
 
 struct Todo {
-       operation: String,
-       items: Vec<Item>
+       items: Vec<Item>,
+       handler_fn: fn(&Context, &Vec<Item>) -> String
 }
 
+fn show_all(c: &Context, items: &Vec<Item>) -> String {
+    "abcdefg".to_string()
+}
 
 impl Handler for Todo {
     fn handle_request(&self, context: Context, mut response: Response) {
-        println!("{}", self.operation);
-        /*
-        let json = match self.operation {
-            "all" => "all",
-            "one" => "one",
-             _  => "unknown",
-        };
-        */
-        let json = "json_string";
+        let json = (self.handler_fn)(&context, &self.items) ;
         if let Err(e) = response.into_writer().send(format!("Hello, {}!", json))  {
-        //There is not much we can do now
         context.log.note(&format!("could not send hello: {}", e.description()));
         }
 
@@ -76,7 +70,7 @@ fn main() {
     let it = Item::new();
 
     let mut router = TreeRouter::new();
-    router.insert(Get, "/todos",Todo { operation: "all".to_string(), items: items }  );
+    router.insert(Get, "/todos",Todo { handler_fn: show_all, items: items }  );
     //router.insert(Get, "/todos/:id",TODO { operation: "find".to_string(), items: items }  );
 
     // server
