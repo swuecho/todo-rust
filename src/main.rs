@@ -60,8 +60,13 @@ struct Todo {
 }
 
 fn show_all(c: &Context, items: &Vec<Item>) -> String {
-    // fmt::Display for Vec<Item>
+    //TODO: fmt::Display for Vec<Item>
      format!("{}", items[0])
+}
+
+fn status_ok(c: &Context, items: &Vec<Item>) -> String {
+    //TODO: fmt::Display for Vec<Item>
+     format!("{}", "")
 }
 
 impl Handler for Todo {
@@ -89,8 +94,11 @@ fn main() {
     items.push(it);
 
     let mut router = TreeRouter::new();
+    //router.insert(Options, "/todos", |_: Context, response: Response| {
+    //           response.set_status(StatusCode::Ok);}) ;
+    //router.insert(Options, "/todos", HandlerFn(say_hello));
     router.insert(Get, "/todos",Todo { handler_fn: show_all, items: items }  );
-    //router.insert(Get, "/todos/:id",TODO { operation: "find".to_string(), items: items }  );
+    //router.insert(Options, "/todos",Todo { handler_fn: status_ok, items: &items }  );
 
     // server
     let server_result = Server {
