@@ -4,6 +4,7 @@
 extern crate rustful;
 extern crate serde;
 extern crate uuid;
+extern crate unicase;
 
 use serde::json;
 use uuid::Uuid;
@@ -12,8 +13,10 @@ use std::error::Error;
 use std::fmt;
 
 use rustful::{Server, Context, Response, Router, TreeRouter, Handler};
-use rustful::Method::{Get, Post};
+use rustful::Method::{Get,Head,Post,Delete,Options,Put,Patch};
+use rustful::header::{AccessControlAllowOrigin,AccessControlAllowMethods, AccessControlAllowHeaders};
 use rustful::mime::{Mime, TopLevel, SubLevel, Attr, Value};
+use unicase::UniCase;
 
 fn new_id() -> String {
     Uuid::new_v4().to_string()
@@ -66,14 +69,15 @@ impl Handler for Todo {
 
         let json = (self.handler_fn)(&context, &self.items) ;
        /* 
-        let allow_origin =response.set_header(header!("access-control-allow-origin", "*"));
-        let allowed_methods = AccessControlAllowMethods(pub Vec<Method>);
         let allowed_headers = AccessControlAllowHeaders(pub Vec<UniCase<String>>);
-
-        response.set_header(allow_origin);   
-        response.set_header(allowed_methods);   
         response.set_header(allowed_headers);
         */
+
+        let allowed_headers = AccessControlAllowHeaders(vec![UniCase("accept".to_string()), UniCase("content-type".to_string())]);
+        let allowed_methods = AccessControlAllowMethods(vec![Get,Head,Post,Delete,Options,Put,Patch]);
+        response.set_header(allowed_headers);   
+        response.set_header(allowed_methods);   
+        response.set_header(AccessControlAllowOrigin::Any);   
         if let Err(e) = response.into_writer().send(json)  {
                context.log.note(&format!("could not send hello: {}", e.description()));
         }

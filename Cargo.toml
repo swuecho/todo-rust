@@ -5,6 +5,7 @@ authors = ["Hao Wu <hwu@intellisurvey.com>"]
 
 [dependencies]
 rustful="*"
+unicase="*"
 serde="*"
 uuid="*"
 serde_macros="*"
