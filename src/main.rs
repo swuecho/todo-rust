@@ -68,10 +68,6 @@ impl Handler for Todo {
     fn handle_request(&self, context: Context, mut response: Response) {
 
         let json = (self.handler_fn)(&context, &self.items) ;
-       /* 
-        let allowed_headers = AccessControlAllowHeaders(pub Vec<UniCase<String>>);
-        response.set_header(allowed_headers);
-        */
 
         let allowed_headers = AccessControlAllowHeaders(vec![UniCase("accept".to_string()), UniCase("content-type".to_string())]);
         let allowed_methods = AccessControlAllowMethods(vec![Get,Head,Post,Delete,Options,Put,Patch]);
