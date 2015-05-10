@@ -76,7 +76,8 @@ fn show_all(c: &Context, items: &Vec<Item>) -> String {
 
 fn find_item(c: &Context, items: &Vec<Item>) -> String {
     if let Some(id) = c.variables.get("id") {
-    //TODO: fmt::Display for Vec<Item>
+    //TODO: return the right id 
+    // items.inter().filter(|x| { (x.id) == id} )
     format!("{}", items[1])
     } else {
     format!("{}", "")
