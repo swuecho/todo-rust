@@ -13,8 +13,9 @@ use std::error::Error;
 use std::fmt;
 
 use rustful::{Server, Context, Response, Router, TreeRouter, Handler};
-use rustful::Method::{Get,Head,Post,Delete,Options,Put,Patch};
-use rustful::header::{AccessControlAllowOrigin,AccessControlAllowMethods, AccessControlAllowHeaders};
+use rustful::Method::{Get, Head, Post, Delete, Options, Put, Patch};
+use rustful::header::{AccessControlAllowOrigin, AccessControlAllowMethods,
+                      AccessControlAllowHeaders};
 use rustful::mime::{Mime, TopLevel, SubLevel, Attr, Value};
 use unicase::UniCase;
 
@@ -48,9 +49,9 @@ impl Item  {
 }
 
 impl fmt::Display for Item {
-      fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-       write!(f, "{}", json::to_string(&self).unwrap())
-      }
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", json::to_string(&self).unwrap())
+    }
 }
 
 
@@ -61,12 +62,12 @@ struct Todo {
 
 fn show_all(c: &Context, items: &Vec<Item>) -> String {
     //TODO: fmt::Display for Vec<Item>
-     format!("{}", items[0])
+    format!("{}", items[0])
 }
 
 fn status_ok(c: &Context, items: &Vec<Item>) -> String {
     //TODO: fmt::Display for Vec<Item>
-     format!("{}", "")
+    format!("{}", "")
 }
 
 impl Handler for Todo {
@@ -76,9 +77,9 @@ impl Handler for Todo {
 
         let allowed_headers = AccessControlAllowHeaders(vec![UniCase("accept".to_string()), UniCase("content-type".to_string())]);
         let allowed_methods = AccessControlAllowMethods(vec![Get,Head,Post,Delete,Options,Put,Patch]);
-        response.set_header(allowed_headers);   
-        response.set_header(allowed_methods);   
-        response.set_header(AccessControlAllowOrigin::Any);   
+        response.set_header(allowed_headers);
+        response.set_header(allowed_methods);
+        response.set_header(AccessControlAllowOrigin::Any);
         if let Err(e) = response.into_writer().send(json)  {
                context.log.note(&format!("could not send hello: {}", e.description()));
         }
