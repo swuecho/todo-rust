@@ -9,6 +9,7 @@ use serde::json;
 use uuid::Uuid;
 use std::collections::HashMap;
 use std::error::Error;
+use std::fmt;
 
 use rustful::{Server, Context, Response, Router, TreeRouter, Handler};
 use rustful::Method::{Get, Post};
@@ -43,6 +44,12 @@ impl Item  {
 
 }
 
+impl fmt::Display for Item {
+      fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+       write!(f, "{}", json::to_string(&self).unwrap())
+      }
+}
+
 
 struct Todo {
        items: Vec<Item>,
@@ -50,14 +57,25 @@ struct Todo {
 }
 
 fn show_all(c: &Context, items: &Vec<Item>) -> String {
-    "abcdefg".to_string()
+    // fmt::Display for Vec<Item>
+     format!("{}", items[0])
 }
 
 impl Handler for Todo {
     fn handle_request(&self, context: Context, mut response: Response) {
+
         let json = (self.handler_fn)(&context, &self.items) ;
-        if let Err(e) = response.into_writer().send(format!("Hello, {}!", json))  {
-        context.log.note(&format!("could not send hello: {}", e.description()));
+       /* 
+        let allow_origin =response.set_header(header!("access-control-allow-origin", "*"));
+        let allowed_methods = AccessControlAllowMethods(pub Vec<Method>);
+        let allowed_headers = AccessControlAllowHeaders(pub Vec<UniCase<String>>);
+
+        response.set_header(allow_origin);   
+        response.set_header(allowed_methods);   
+        response.set_header(allowed_headers);
+        */
+        if let Err(e) = response.into_writer().send(json)  {
+               context.log.note(&format!("could not send hello: {}", e.description()));
         }
 
     }
@@ -66,8 +84,9 @@ impl Handler for Todo {
 
 
 fn main() {
-    let items : Vec<Item> = Vec::new();
+    let mut items : Vec<Item> = Vec::new();
     let it = Item::new();
+    items.push(it);
 
     let mut router = TreeRouter::new();
     router.insert(Get, "/todos",Todo { handler_fn: show_all, items: items }  );
