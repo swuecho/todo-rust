@@ -8,6 +8,7 @@ extern crate unicase;
 
 use serde::json;
 use uuid::Uuid;
+use std::sync::{Arc, RwLock};
 use std::collections::HashMap;
 use std::error::Error;
 use std::fmt;
@@ -56,13 +57,30 @@ impl fmt::Display for Item {
 
 
 struct Todo {
-       items: Vec<Item>,
+       items: Arc<Vec<Item>>,
        handler_fn: fn(&Context, &Vec<Item>) -> String
+}
+
+fn vec2str(a: &Vec<Item>) -> String {
+    let mut s = "[".to_string();
+    for i in a.iter() {
+        s = s + &(format!("{},", i));
+    }
+    s.trim_right_matches(',').to_string() + " ]"
 }
 
 fn show_all(c: &Context, items: &Vec<Item>) -> String {
     //TODO: fmt::Display for Vec<Item>
-    format!("{}", items[0])
+    vec2str(items)
+}
+
+fn find_item(c: &Context, items: &Vec<Item>) -> String {
+    if let Some(id) = c.variables.get("id") {
+    //TODO: fmt::Display for Vec<Item>
+    format!("{}", items[1])
+    } else {
+    format!("{}", "")
+    }
 }
 
 fn status_ok(c: &Context, items: &Vec<Item>) -> String {
@@ -91,15 +109,21 @@ impl Handler for Todo {
 
 fn main() {
     let mut items : Vec<Item> = Vec::new();
-    let it = Item::new();
-    items.push(it);
+    let it0 = Item::new();
+    let it1 = Item::new();
+    items.push(it0);
+    items.push(it1);
+    let shared = Arc::new(items);
 
     let mut router = TreeRouter::new();
     //router.insert(Options, "/todos", |_: Context, response: Response| {
     //           response.set_status(StatusCode::Ok);}) ;
     //router.insert(Options, "/todos", HandlerFn(say_hello));
-    router.insert(Get, "/todos",Todo { handler_fn: show_all, items: items }  );
-    //router.insert(Options, "/todos",Todo { handler_fn: status_ok, items: &items }  );
+    router.insert(Options, "/todos",Todo { handler_fn: status_ok, items: shared.clone() } );
+    router.insert(Get, "/todos",Todo { handler_fn: show_all, items: shared.clone() }  );
+
+    router.insert(Options, "/todos/:id",Todo { handler_fn: status_ok, items: shared.clone() } );
+    router.insert(Get, "/todos/:id",Todo { handler_fn: find_item, items: shared.clone() } );
 
     // server
     let server_result = Server {
