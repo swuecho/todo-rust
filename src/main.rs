@@ -38,20 +38,19 @@ impl Item  {
     fn url(&self) -> String {
         let host = "http://todo-backend-rust.herokuapp.com";
         let path = "todo";
-        let id = self.id.to_owned();
-        format!("{}/{}/{}", host, path, id)
+        format!("{}/{}/{}", host, path, self.id)
     }
 
 }
 
 
-struct TODO {
+struct Todo {
        operation: String,
        items: Vec<Item>
 }
 
 
-impl Handler for TODO {
+impl Handler for Todo {
     fn handle_request(&self, context: Context, mut response: Response) {
         println!("{}", self.operation);
         /*
@@ -77,7 +76,7 @@ fn main() {
     let it = Item::new();
 
     let mut router = TreeRouter::new();
-    router.insert(Get, "/todos",TODO { operation: "all".to_string(), items: items }  );
+    router.insert(Get, "/todos",Todo { operation: "all".to_string(), items: items }  );
     //router.insert(Get, "/todos/:id",TODO { operation: "find".to_string(), items: items }  );
 
     // server
