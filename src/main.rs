@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+#![allow(unused_variables)] 
 #![feature(custom_derive, plugin)]
 #![plugin(serde_macros)]
 
@@ -9,7 +11,6 @@ extern crate unicase;
 use serde::json;
 use uuid::Uuid;
 use std::sync::{Arc, RwLock};
-use std::collections::HashMap;
 use std::error::Error;
 use std::fmt;
 
@@ -61,18 +62,23 @@ struct Todo {
        handler_fn: fn(&Context, &Vec<Item>) -> String
 }
 
-fn vec2str(a: &Vec<Item>) -> String {
-    let mut s = "[".to_string();
-    for i in a.iter() {
-        s = s + &(format!("{},", i));
-    }
-    s.trim_right_matches(',').to_string() + " ]"
+
+fn vec2str(vec_items: &Vec<Item>) -> String {
+    let vec_str: Vec<String> = vec_items.iter().map(|x| { format!("{}", x) }).collect();
+    format!("[{}]", vec_str.connect(","))
+}
+
+#[test]
+fn it_works() {
+    assert!(true);
 }
 
 fn show_all(c: &Context, items: &Vec<Item>) -> String {
     //TODO: fmt::Display for Vec<Item>
     vec2str(items)
 }
+
+    
 
 fn find_item(c: &Context, items: &Vec<Item>) -> String {
     if let Some(id) = c.variables.get("id") {
