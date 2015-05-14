@@ -56,10 +56,11 @@ impl fmt::Display for Item {
     }
 }
 
+type RwItems = Arc<RwLock<Vec<Item>>>;
 
 struct Todo {
-       items: Arc<Vec<Item>>,
-       handler_fn: fn(&Context, &Vec<Item>) -> String
+       items: RwItems,
+       handler_fn: fn(&Context, &RwItems) -> String
 }
 
 
@@ -68,29 +69,24 @@ fn vec2str(vec_items: &Vec<Item>) -> String {
     format!("[{}]", vec_str.connect(","))
 }
 
-#[test]
-fn it_works() {
-    assert!(true);
-}
-
-fn show_all(c: &Context, items: &Vec<Item>) -> String {
+fn show_all(c: &Context, items: &RwItems) -> String {
     //TODO: fmt::Display for Vec<Item>
-    vec2str(items)
+    vec2str(&(*(items.read().unwrap())))
 }
 
     
 
-fn find_item(c: &Context, items: &Vec<Item>) -> String {
+fn find_item(c: &Context, items: &RwItems) -> String {
     if let Some(id) = c.variables.get("id") {
     //TODO: return the right id 
     // items.inter().filter(|x| { (x.id) == id} )
-    format!("{}", items[1])
+    format!("{}", items.read().unwrap()[1])
     } else {
     format!("{}", "")
     }
 }
 
-fn status_ok(c: &Context, items: &Vec<Item>) -> String {
+fn status_ok(c: &Context, items: &RwItems) -> String {
     //TODO: fmt::Display for Vec<Item>
     format!("{}", "")
 }
@@ -98,7 +94,7 @@ fn status_ok(c: &Context, items: &Vec<Item>) -> String {
 impl Handler for Todo {
     fn handle_request(&self, context: Context, mut response: Response) {
 
-        let json = (self.handler_fn)(&context, &self.items) ;
+        let json = (self.handler_fn)(&context, &(self.items)) ;
 
         let allowed_headers = AccessControlAllowHeaders(vec![UniCase("accept".to_string()), UniCase("content-type".to_string())]);
         let allowed_methods = AccessControlAllowMethods(vec![Get,Head,Post,Delete,Options,Put,Patch]);
@@ -120,7 +116,7 @@ fn main() {
     let it1 = Item::new();
     items.push(it0);
     items.push(it1);
-    let shared = Arc::new(items);
+    let shared = Arc::new(RwLock::new(items));
 
     let mut router = TreeRouter::new();
     //router.insert(Options, "/todos", |_: Context, response: Response| {
