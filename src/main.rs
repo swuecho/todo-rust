@@ -8,17 +8,19 @@ extern crate serde;
 extern crate uuid;
 extern crate unicase;
 
-use serde::json;
-use uuid::Uuid;
-use std::sync::{Arc, RwLock};
-use std::error::Error;
 use std::fmt;
+use std::io::Read;
+use std::error::Error;
+use std::sync::{Arc, RwLock};
 
 use rustful::{Server, Context, Response, Router, TreeRouter, Handler};
 use rustful::Method::{Get, Head, Post, Delete, Options, Put, Patch};
 use rustful::header::{AccessControlAllowOrigin, AccessControlAllowMethods,
                       AccessControlAllowHeaders};
 use rustful::mime::{Mime, TopLevel, SubLevel, Attr, Value};
+
+use serde::json;
+use uuid::Uuid;
 use unicase::UniCase;
 
 fn new_id() -> String {
@@ -75,6 +77,13 @@ fn show_all(c: &Context, items: &RwItems) -> String {
 }
 
     
+fn add_item(c: &Context, items: &RwItems) -> String {
+    let mut string = String::new();
+    //let ref body_reader =  c.body_reader.by_ref();
+    c.read_to_string(&mut string).unwrap();
+    string
+
+}
 
 fn find_item(c: &Context, items: &RwItems) -> String {
     if let Some(id) = c.variables.get("id") {
@@ -124,6 +133,7 @@ fn main() {
     //router.insert(Options, "/todos", HandlerFn(say_hello));
     router.insert(Options, "/todos",Todo { handler_fn: status_ok, items: shared.clone() } );
     router.insert(Get, "/todos",Todo { handler_fn: show_all, items: shared.clone() }  );
+    router.insert(Post, "/todos",Todo { handler_fn: add_item, items: shared.clone() }  );
 
     router.insert(Options, "/todos/:id",Todo { handler_fn: status_ok, items: shared.clone() } );
     router.insert(Get, "/todos/:id",Todo { handler_fn: find_item, items: shared.clone() } );
