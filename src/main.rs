@@ -62,7 +62,7 @@ type RwItems = Arc<RwLock<Vec<Item>>>;
 
 struct Todo {
        items: RwItems,
-       handler_fn: fn(&Context, &RwItems) -> String
+       handler_fn: fn(&mut Context, &RwItems) -> String
 }
 
 
@@ -71,13 +71,13 @@ fn vec2str(vec_items: &Vec<Item>) -> String {
     format!("[{}]", vec_str.connect(","))
 }
 
-fn show_all(c: &Context, items: &RwItems) -> String {
+fn show_all(c: &mut Context, items: &RwItems) -> String {
     //TODO: fmt::Display for Vec<Item>
     vec2str(&(*(items.read().unwrap())))
 }
 
     
-fn add_item(c: &Context, items: &RwItems) -> String {
+fn add_item(c: &mut Context, items: &RwItems) -> String {
     let mut string = String::new();
     //let ref body_reader =  c.body_reader.by_ref();
     c.read_to_string(&mut string).unwrap();
@@ -85,7 +85,7 @@ fn add_item(c: &Context, items: &RwItems) -> String {
 
 }
 
-fn find_item(c: &Context, items: &RwItems) -> String {
+fn find_item(c: &mut Context, items: &RwItems) -> String {
     if let Some(id) = c.variables.get("id") {
     //TODO: return the right id 
     // items.inter().filter(|x| { (x.id) == id} )
@@ -95,15 +95,15 @@ fn find_item(c: &Context, items: &RwItems) -> String {
     }
 }
 
-fn status_ok(c: &Context, items: &RwItems) -> String {
+fn status_ok(c: &mut Context, items: &RwItems) -> String {
     //TODO: fmt::Display for Vec<Item>
     format!("{}", "")
 }
 
 impl Handler for Todo {
-    fn handle_request(&self, context: Context, mut response: Response) {
+    fn handle_request(&self, mut context: Context, mut response: Response) {
 
-        let json = (self.handler_fn)(&context, &(self.items)) ;
+        let json = (self.handler_fn)(&mut context, &(self.items)) ;
 
         let allowed_headers = AccessControlAllowHeaders(vec![UniCase("accept".to_string()), UniCase("content-type".to_string())]);
         let allowed_methods = AccessControlAllowMethods(vec![Get,Head,Post,Delete,Options,Put,Patch]);
