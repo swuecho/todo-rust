@@ -30,10 +30,10 @@ fn new_id() -> String {
 
 #[derive(Debug,Serialize, Deserialize)]
 struct Item {
-     id   :     String,
+     id   :     Option<String>,
      title:     Option<String>,
-     completed : bool,
-     order  :   u32,
+     completed: Option<bool>,
+     order  :   Option<u32>,
      text   :   Option<String>,
 }
 
@@ -41,14 +41,15 @@ impl Item  {
 
     fn new() -> Item {
         let id = new_id();
-        Item { id : id, completed: false, order: 0,  title: None, text: None }
+        Item { id : Some(id), completed: Some(false), order: Some(0),  title:None, text: None}
     }
 
-    fn url(&self) -> String {
+    /*fn url(&self) -> String {
         let host = "http://todo-backend-rust.herokuapp.com";
         let path = "todo";
-        format!("{}/{}/{}", host, path, self.id)
+        format!("{}/{}/{}", host, path, self.id.unwrap().to_owned())
     }
+    */
 
 }
 
@@ -81,8 +82,11 @@ fn add_item(c: &mut Context, items: &RwItems) -> String {
     let mut string = String::new();
     //let ref body_reader =  c.body_reader.by_ref();
     c.read_to_string(&mut string).unwrap();
-    string
-
+    let mut item: Item = json::from_str(&string).unwrap();
+    item.id = Some(new_id());
+    let mut w = items.write().unwrap();
+    (*w).push(item);
+    "".to_string()
 }
 
 fn find_item(c: &mut Context, items: &RwItems) -> String {
